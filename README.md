@@ -1,19 +1,19 @@
-# Ion-channel missense variant classification, evaluated honestly
+﻿# Ion-channel missense variant classification, evaluated honestly
 
 A classifier that predicts whether a missense variant in an ion-channel gene is pathogenic or benign, built from public ClinVar labels and precomputed dbNSFP annotations. The point of the project is less the classifier than the evaluation. Variant pathogenicity data has a strong group structure, and the standard way of splitting it produces numbers that look good and mean little. This repository measures that effect directly.
 
 ## Headline result
 
-I built a model that is given **only the name of the gene a variant sits in** — no conservation, no predictor scores, no position, nothing about the variant itself. It cannot assess whether any individual variant is damaging. Anything it scores above chance is memorised gene structure.
+I built a model that is given **only the name of the gene a variant sits in** â€” no conservation, no predictor scores, no position, nothing about the variant itself. It cannot assess whether any individual variant is damaging. Anything it scores above chance is memorised gene structure.
 
 |Split|ROC-AUC|Balanced accuracy|
 |-|-|-|
 |Variant-wise (standard, leaky)|**0.855**|0.760|
-|Gene-wise (correct)|**0.500 ± 0.000**|0.500|
+|Gene-wise (correct)|**0.500 Â± 0.000**|0.500|
 
 Under the usual random split, a model that knows nothing about variants looks like a competent classifier. Under a split that holds out whole genes, it falls to exactly chance in every fold.
 
-!\[Leakage, measured](figures/leakage.png)
+![Leakage, measured](figures/leakage.png)
 
 ## Why the split matters
 
@@ -34,18 +34,18 @@ All evaluation here uses `GroupKFold` with the gene as the group, so every varia
 
 ## Data
 
-**Labels — ClinVar** (`variant\_summary.txt.gz`, September 2026 release). Filters, in order:
+**Labels â€” ClinVar** (`variant_summary.txt.gz`, September 2026 release). Filters, in order:
 
 * GRCh38 rows only. ClinVar lists every variant once per genome build; keeping both would duplicate every variant and put identical copies on both sides of a split.
 * Single-nucleotide variants in a 40-gene ion-channel panel (cardiac, neuronal, skeletal muscle, and CFTR).
 * Review status with stated assertion criteria and no inter-submitter conflict: single submitter, multiple submitters with no conflicts, expert panel, or practice guideline.
 * Missense only, parsed from the HGVS protein change. Nonsense variants (`Ter`) are excluded because they act through truncation rather than substitution and are almost always pathogenic, which would make the task trivially easier.
-* Pathogenic / likely pathogenic → 1, benign / likely benign → 0. Variants of uncertain significance are held out entirely.
+* Pathogenic / likely pathogenic â†’ 1, benign / likely benign â†’ 0. Variants of uncertain significance are held out entirely.
 * Genes with fewer than 30 labelled variants are dropped. Each gene is a cross-validation group, and very small groups produce noisy or single-class folds where AUC is undefined.
 
 Result: **6,383 labelled variants across 33 genes** (4,616 pathogenic, 1,767 benign; 72.3% pathogenic), plus **37,466 variants of uncertain significance**. In these genes, 85% of confidently reviewed missense variants are still unresolved.
 
-**Features — dbNSFP**, queried through the MyVariant.info API in batches of 1,000 rather than downloading the full multi-gigabyte release. Twelve scores in three tiers:
+**Features â€” dbNSFP**, queried through the MyVariant.info API in batches of 1,000 rather than downloading the full multi-gigabyte release. Twelve scores in three tiers:
 
 |Tier|Features|What they are|
 |-|-|-|
@@ -57,14 +57,14 @@ Two handling details. A variant can fall in several transcripts, and dbNSFP retu
 
 ## Results
 
-Random forest (400 trees, default hyperparameters, fixed seed), 5-fold cross-validation, mean ± standard deviation across folds:
+Random forest (400 trees, default hyperparameters, fixed seed), 5-fold cross-validation, mean Â± standard deviation across folds:
 
 |Model|Gene-wise AUC|Variant-wise AUC|Gap|
 |-|-|-|-|
-|T1 conservation|0.823 ± 0.037|0.897 ± 0.005|+0.074|
-|T2 + classic|0.928 ± 0.018|0.951 ± 0.005|+0.023|
-|T3 + ensembles|0.970 ± 0.006|0.978 ± 0.003|+0.008|
-|Gene identity only|0.500 ± 0.000|0.855 ± 0.018|+0.355|
+|T1 conservation|0.823 Â± 0.037|0.897 Â± 0.005|+0.074|
+|T2 + classic|0.928 Â± 0.018|0.951 Â± 0.005|+0.023|
+|T3 + ensembles|0.970 Â± 0.006|0.978 Â± 0.003|+0.008|
+|Gene identity only|0.500 Â± 0.000|0.855 Â± 0.018|+0.355|
 
 Single published scores on the same gene-wise folds: **REVEL 0.964**, **AlphaMissense 0.963**, CADD 0.875, phyloP 0.839.
 
@@ -76,9 +76,9 @@ Three things I take from this.
 
 **My best model does not meaningfully beat REVEL.** T3 reaches 0.970 against REVEL's 0.964, within one standard deviation. Permutation importance shows why: in T3, AlphaMissense and REVEL account for 82% of the importance and every conservation feature drops to zero. T3 is effectively a wrapper around two published scores. I treat T2 as the model that is actually mine.
 
-!\[What the T2 model relies on](figures/importance.png)
+![What the T2 model relies on](figures/importance.png)
 
-In T2 the importance is shared across independent sources of evidence — SIFT 0.29, PROVEAN 0.23, MutationAssessor 0.18, phyloP 0.16 — rather than collapsing onto one input.
+In T2 the importance is shared across independent sources of evidence â€” SIFT 0.29, PROVEAN 0.23, MutationAssessor 0.18, phyloP 0.16 â€” rather than collapsing onto one input.
 
 ### Variants of uncertain significance
 
@@ -86,15 +86,15 @@ The T2 model, trained on all labelled variants, scores the 37,466 held-out VUS:
 
 |Score|Variants|Share|
 |-|-|-|
-|≥ 0.9|9,273|24.8%|
-|0.7 – 0.9|5,877|15.7%|
-|0.3 – 0.7|9,058|24.2%|
-|0.1 – 0.3|6,056|16.2%|
+|â‰¥ 0.9|9,273|24.8%|
+|0.7 â€“ 0.9|5,877|15.7%|
+|0.3 â€“ 0.7|9,058|24.2%|
+|0.1 â€“ 0.3|6,056|16.2%|
 |< 0.1|7,202|19.2%|
 
 The mean score is 0.52, well below the 72% pathogenic rate of the training set, so the model is discriminating rather than defaulting to the prior. At gene level the ordering is sensible: VUS in SCN1A, SCN3A, SCN8A and SCN2A score highest, those in TRDN, HCN4 and KCNE1 lowest, consistent with their labelled base rates.
 
-!\[VUS predictions](figures/vus\_distribution.png)
+![VUS predictions](figures/vus_distribution.png)
 
 ## Limitations
 
@@ -104,7 +104,7 @@ The mean score is 0.52, well below the 72% pathogenic rate of the training set, 
 
 **Ascertainment bias.** Which variants appear in ClinVar depends on which genes are routinely tested and which populations are sequenced. That bias is the source of the gene-level base rates above, and it is not removed by the gene-wise split, only prevented from inflating the score.
 
-**Informative missingness.** Feature coverage varies by gene — some genes are missing at least one score for every variant, others for 16% — and gene correlates with label, so missingness itself is weakly predictive. Median imputation stops the model from treating absence as a signal, but the coverage difference between genes remains.
+**Informative missingness.** Feature coverage varies by gene â€” some genes are missing at least one score for every variant, others for 16% â€” and gene correlates with label, so missingness itself is weakly predictive. Median imputation stops the model from treating absence as a signal, but the coverage difference between genes remains.
 
 **Evaluation choices.** `GroupKFold` balances fold sizes but not class composition; `StratifiedGroupKFold` would be the better choice. Results come from a single random seed, so the reported spread is fold variance rather than seed variance. Hyperparameters were deliberately left at defaults: tuning on the same folds used for reporting would bias the scores upward without nested cross-validation.
 
@@ -122,14 +122,14 @@ python -m venv .venv
 pip install -r requirements.txt
 
 mkdir data
-curl -L -o data/variant\_summary.txt.gz https://ftp.ncbi.nlm.nih.gov/pub/clinvar/tab\_delimited/variant\_summary.txt.gz
+curl -L -o data/variant_summary.txt.gz https://ftp.ncbi.nlm.nih.gov/pub/clinvar/tab_delimited/variant_summary.txt.gz
 
-python build\_labels.py      # ClinVar -> data/labelled.csv, data/vus.csv
-python fetch\_features.py    # dbNSFP via MyVariant.info -> data/features\_\*.csv
+python build_labels.py      # ClinVar -> data/labelled.csv, data/vus.csv
+python fetch_features.py    # dbNSFP via MyVariant.info -> data/features_*.csv
 python model.py             # tiered models, both splits, probe, baselines -> data/results.csv
 python interpret.py         # permutation importance on held-out genes -> data/importances.csv
-python predict\_vus.py       # score the VUS -> data/vus\_predictions.csv
-python figures.py           # -> figures/\*.png
+python predict_vus.py       # score the VUS -> data/vus_predictions.csv
+python figures.py           # -> figures/*.png
 ```
 
 ClinVar is updated monthly, so a later download will give slightly different counts.
@@ -137,11 +137,11 @@ ClinVar is updated monthly, so a later download will give slightly different cou
 ## Repository layout
 
 ```
-build\_labels.py      ClinVar parsing, filtering and labelling
-fetch\_features.py    dbNSFP annotations via the MyVariant.info API
+build_labels.py      ClinVar parsing, filtering and labelling
+fetch_features.py    dbNSFP annotations via the MyVariant.info API
 model.py             Tiered models under gene-wise and variant-wise splits
 interpret.py         Permutation importance
-predict\_vus.py       Scores for variants of uncertain significance
+predict_vus.py       Scores for variants of uncertain significance
 figures.py           Figures
 figures/             Result figures
 data/                Downloads and intermediate files (not committed, except results)
@@ -149,10 +149,11 @@ data/                Downloads and intermediate files (not committed, except res
 
 ## References
 
-* Landrum MJ et al. ClinVar: improvements to accessing data. *Nucleic Acids Research* 48, D835–D844 (2020).
+* Landrum MJ et al. ClinVar: improvements to accessing data. *Nucleic Acids Research* 48, D835â€“D844 (2020).
 * Liu X et al. dbNSFP v4: a comprehensive database of transcript-specific functional predictions and annotations for human nonsynonymous and splice-site SNVs. *Genome Medicine* 12, 103 (2020).
 * Xin J et al. High-performance web services for querying gene and variant annotation. *Genome Biology* 17, 91 (2016).
-* Ioannidis NM et al. REVEL: an ensemble method for predicting the pathogenicity of rare missense variants. *American Journal of Human Genetics* 99, 877–885 (2016).
+* Ioannidis NM et al. REVEL: an ensemble method for predicting the pathogenicity of rare missense variants. *American Journal of Human Genetics* 99, 877â€“885 (2016).
 * Cheng J et al. Accurate proteome-wide missense variant effect prediction with AlphaMissense. *Science* 381, eadg7492 (2023).
-* Richards S et al. Standards and guidelines for the interpretation of sequence variants (ACMG/AMP). *Genetics in Medicine* 17, 405–424 (2015).
+* Richards S et al. Standards and guidelines for the interpretation of sequence variants (ACMG/AMP). *Genetics in Medicine* 17, 405â€“424 (2015).
+
 
